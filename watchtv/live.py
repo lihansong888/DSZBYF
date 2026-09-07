@@ -2,17 +2,25 @@ import requests
 import re
 import os
 
-
 # ========== 填写源的地址 ==========
 URL_LIST = [
-    "https://live.445569.xyz/live.m3u"
+    "https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yiyifafa.txt"
 ]
 
-# ========== 分组映射：左边是源里的分组名，右边是输出时改后的分组名（裤佬源） ==========
+# ========== 分组映射：左边是源里的分组名，右边是输出时改后的分组名（yifa） ==========
 GROUP_MAP = {
-    "💎地方台直播": "hansong地方台",
-    "🔮港澳台直播": "hansong港澳台",
+    "咪咕央视": "hansong咪咕央卫直播2",
+    "今日影视": "hansong港澳台2",
 }
+
+# ========== 要屏蔽的节目：频道名【包含】以下任意关键词的，会被剔除不输出 ==========
+# 例：想屏蔽"测试"频道 → 填 "测试"；想屏蔽"风云"频道 → 填 "风云"
+# 想精确屏蔽某个频道，就把完整频道名填上
+# 留空 [] 表示不屏蔽任何节目
+EXCLUDE_KEYWORDS = [
+     "需切换EXO解码,1",
+    #"请勿打赏,1",
+]
 
 def parse_any(text: str):
     res = []
@@ -58,6 +66,7 @@ def main():
     # 用改后的分组名初始化空列表
     group_bucket = {v: [] for v in GROUP_MAP.values()}
     seen = set()
+    blocked_cnt = 0
     for url in URL_LIST:
         try:
             resp = requests.get(url, timeout=15)
@@ -69,6 +78,10 @@ def main():
                 # 只保留 GROUP_MAP 里有的分组，其他全屏蔽
                 if ch_group not in GROUP_MAP:
                     continue
+                # ===== 屏蔽指定节目 =====
+                if any(k in ch_name for k in EXCLUDE_KEYWORDS):
+                    blocked_cnt += 1
+                    continue
                 # 关键：查映射表，把源分组名改成输出分组名
                 output_group = GROUP_MAP[ch_group]
                 item_key = (ch_name, play_url)
@@ -78,10 +91,9 @@ def main():
         except Exception as e:
             print(f"⚠️ 拉取 {url} 失败：{e}")
     total_cnt = sum(len(v) for v in group_bucket.values())
-    print(f"✅筛选结束，共提取 {total_cnt} 个频道")
+    print(f"✅筛选结束，共提取 {total_cnt} 个频道（已屏蔽 {blocked_cnt} 个）")
     for gname, ch_list in group_bucket.items():
         print(f"  - {gname}: {len(ch_list)} 个频道")
-
     out_dir = os.path.dirname(os.path.abspath(__file__))
     output_m3u = ["#EXTM3U"]
     for gname, ch_list in group_bucket.items():
