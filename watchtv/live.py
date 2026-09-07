@@ -18,8 +18,8 @@ GROUP_MAP = {
 # 想精确屏蔽某个频道，就把完整频道名填上
 # 留空 [] 表示不屏蔽任何节目
 EXCLUDE_KEYWORDS = [
-     "需切换EXO解码,1",
-    "请勿打赏,1",
+     "需切换EXO解码",
+    "请勿打赏",
 ]
 
 def parse_any(text: str):
