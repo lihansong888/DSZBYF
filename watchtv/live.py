@@ -4,7 +4,7 @@ import os
 
 # ========== 填写源的地址 ==========
 URL_LIST = [
-    "https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yiyifafa.txt"
+    "http://git.yylx.win/github.com/fafa002/yf2025/blob/main/yiyifafa.txt"
 ]
 
 # ========== 分组映射：左边是源里的分组名，右边是输出时改后的分组名（yifa） ==========
